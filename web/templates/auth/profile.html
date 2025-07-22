@@ -55,9 +55,9 @@
             <li{% if tab_name == "premises" %} class="active"{% endif %}><a href="{% url "auth_profile_premises" profile.username %}">{% trans "Premises" %}</a></li>
             <li{% if tab_name == "fallacies" %} class="active"{% endif %}><a href="{% url "auth_profile_fallacies" profile.username %}">{% trans "Fallacy Reports" %}</a></li>
             <li class="actions-tab">
-                {% ifequal profile user %}
+                {% if profile == user %}
                 <a class="button" href="{% url "auth_profile_update" %}">{% trans "update profile" %}</a>
-                {% endifequal %}
+                {% endif %}
                 {% if not user.is_anonymous and can_follow %}
                 {% if is_followed %}
                     <a href="{% url "api-profile-follow" profile.username %}" class="button anchor unfollow" data-method="delete">{% trans "Unfollow" %}</a>

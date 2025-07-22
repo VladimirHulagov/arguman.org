@@ -4,7 +4,7 @@
 {% block content %}
     <section class="container">
         <form id="auth-form" action="{% url "auth_registration" %}" method="post">
-            <h3>{% trans "Register" %}(<a href="{% url "socialauth_begin" "twitter" %}">{% trans "or login with twitter" %}</a>)</h3>
+            <h3>{% trans "Register" %}(<a href="{% url "social:begin" "twitter" %}">{% trans "or login with twitter" %}</a>)</h3>
             {% csrf_token %}
             {{ form.as_p }}
             <ul class="form-actions">

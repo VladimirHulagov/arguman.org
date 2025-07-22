@@ -9,5 +9,5 @@ class Command(BaseCommand):
         for contention in contentions:
             score = contention.calculate_score()
             contention.score = score
-            print contention.title, ' == ', contention.score
+            print(contention.title, ' == ', contention.score)
             contention.save(skip_date_update=True)

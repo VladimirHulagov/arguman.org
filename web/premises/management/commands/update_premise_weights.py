@@ -8,4 +8,4 @@ class Command(BaseCommand):
         contentions = Contention.objects.all()
 
         for contention in contentions:
-            print contention.update_premise_weights()
+            print(contention.update_premise_weights())

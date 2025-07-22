@@ -35,7 +35,7 @@ class NounDetail(DetailView):
         if source:
             contentions = contentions.exclude(id=source)
             indirect_contentions = indirect_contentions.exclude(id=source)
-        return super(NounDetail, self).get_context_data(
+        return super().get_context_data(
             contentions=contentions,
             indirect_contentions=indirect_contentions,
             **kwargs)
@@ -66,7 +66,7 @@ class RelationCreate(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         noun = self.get_noun()
-        return super(RelationCreate, self).get_context_data(
+        return super().get_context_data(
             noun=noun, **kwargs)
 
     def get_noun(self):
@@ -89,7 +89,7 @@ class ChannelDetail(HomeView):
 
     def get_context_data(self, **kwargs):
         channel = self.get_channel()
-        return super(ChannelDetail, self).get_context_data(
+        return super().get_context_data(
             active_users=self.get_active_users(),
             channel=channel, **kwargs)
 

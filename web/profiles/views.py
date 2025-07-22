@@ -1,7 +1,7 @@
 import json
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponse
 from django.utils.translation import get_language
 from django.views.generic import (
@@ -26,7 +26,7 @@ class RegistrationView(CreateView):
     template_name = "auth/register.html"
 
     def form_valid(self, form):
-        response = super(RegistrationView, self).form_valid(form)
+        response = super().form_valid(form)
         user = authenticate(username=form.cleaned_data["username"],
                             password=form.cleaned_data["password1"])
         login(self.request, user)
@@ -42,13 +42,13 @@ class LoginView(FormView):
 
     def form_valid(self, form):
         login(self.request, form.get_user())
-        return super(LoginView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         return self.request.GET.get("next") or reverse("home")
 
     def get_context_data(self, **kwargs):
-        context = super(LoginView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["next"] = self.request.GET.get("next", "")
         return context
 
@@ -56,7 +56,7 @@ class LoginView(FormView):
 class LogoutView(LoginRequiredMixin, RedirectView):
     def get(self, request, *args, **kwargs):
         logout(request)
-        return super(LogoutView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def get_redirect_url(self, **kwargs):
         return reverse("home")
@@ -78,13 +78,13 @@ class BaseProfileDetailView(DetailView):
 
         can_follow = self.request.user != user
 
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             is_followed = self.request.user.following.filter(
                 pk=user.id).exists()
         else:
             is_followed = False
 
-        return super(BaseProfileDetailView, self).get_context_data(
+        return super().get_context_data(
             can_follow=can_follow,
             is_followed=is_followed,
             tab_name=self.tab_name,
@@ -98,7 +98,7 @@ class ProfileDetailView(BaseProfileDetailView):
         Adds extra context to template
         """
         user = self.get_object()
-        return super(ProfileDetailView, self).get_context_data(
+        return super().get_context_data(
             related_channels=self.get_related_channels(user),
             discussed_users=self.get_discussed_users(user),
             supported_premises=self.get_supported_premises(user),
@@ -142,7 +142,7 @@ class ProfileDetailView(BaseProfileDetailView):
             total = because + but + however
 
             return {
-                'user': profile,
+                'user': user,
                 'because': 100 * float(because) / total,
                 'but': 100 * float(but) / total,
                 'however': 100 * float(however) / total
@@ -226,7 +226,7 @@ class ProfileArgumentsView(BaseProfileDetailView):
         if user != self.request.user:
             contentions = contentions.filter(is_published=True)
 
-        return super(ProfileArgumentsView, self).get_context_data(
+        return super().get_context_data(
             contentions=contentions
         )
 
@@ -242,7 +242,7 @@ class ProfileFallaciesView(BaseProfileDetailView):
             reporter=user
         ).order_by('-id')
 
-        return super(ProfileFallaciesView, self).get_context_data(
+        return super().get_context_data(
             fallacies=fallacies
         )
 
@@ -271,7 +271,7 @@ class ProfilePremisesView(BaseProfileDetailView, PaginationMixin):
     def get_context_data(self, **kwargs):
         premises = self.get_objects()
 
-        return super(ProfilePremisesView, self).get_context_data(
+        return super().get_context_data(
             premises=premises,
             has_next_page=self.has_next_page(),
             next_page_url=self.get_next_page_url(),

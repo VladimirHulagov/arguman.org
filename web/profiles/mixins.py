@@ -5,16 +5,16 @@ from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 
 
-class LoginRequiredMixin(object):
+class LoginRequiredMixin:
     """
     Login required mixin.
     """
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(LoginRequiredMixin, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
-class JSONResponseMixin(object):
+class JSONResponseMixin:
     """
     A mixin that can be used to render a JSON response.
     """

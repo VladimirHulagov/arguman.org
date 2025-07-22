@@ -11,8 +11,8 @@ class PostmarkMessage(dict):
         try:
             message_dict = {}
             message_dict["From"] = message.from_email
-            message_dict["Subject"] = unicode(message.subject)
-            message_dict["TextBody"] = unicode(message.body)
+            message_dict["Subject"] = message.subject
+            message_dict["TextBody"] = message.body
 
             if message.to:
                 message_dict["To"] = ",".join(message.to)
@@ -26,7 +26,7 @@ class PostmarkMessage(dict):
             if isinstance(message, EmailMultiAlternatives):
                     for alt in message.alternatives:
                         if alt[1] == "text/html":
-                            message_dict["HtmlBody"] = unicode(alt[0])
+                            message_dict["HtmlBody"] = alt[0]
 
             if len(message.extra_headers):
                 message_dict["Headers"] = [{"Name": x[0], "Value": x[1]} for x in message.extra_headers.items()]
@@ -39,7 +39,7 @@ class PostmarkMessage(dict):
                 message_dict = {}
             else:
                 raise
-        super(PostmarkMessage, self).__init__(message_dict)
+        super().__init__(message_dict)
 
 class EmailBackend(BaseEmailBackend):
 

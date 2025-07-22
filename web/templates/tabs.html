@@ -1,14 +1,14 @@
 {% load i18n %}
 <ul class="tabs">
-    <li class="newsfeed{% ifequal tab_class "newsfeed" %} active{% endifequal %}">
+    <li class="newsfeed{% if tab_class == "newsfeed" %} active{% endif %}">
         <a href="{% url "newsfeed" %}">{% trans "Newsfeed" %}</a></li>
-    <li class="featured{% ifequal tab_class "featured" %} active{% endifequal %}">
+    <li class="featured{% if tab_class == "featured" %} active{% endif %}">
         <a href="/">{% trans "Featured" %}</a></li>
-    <li class="news{% ifequal tab_class "news" %} active{% endifequal %}">
+    <li class="news{% if tab_class == "news" %} active{% endif %}">
         <a href="{% url "contentions_latest" %}">{% trans "New" %}</a></li>
-    <li class="fallacies{% ifequal tab_class "fallacies" %} active{% endifequal %}">
+    <li class="fallacies{% if tab_class == "fallacies" %} active{% endif %}">
         <a href="{% url "fallacies" %}">{% trans "Fallacies" %}</a>
     </li>
-    <li class="stats{% ifequal tab_class "stats" %} active{% endifequal %}">
+    <li class="stats{% if tab_class == "stats" %} active{% endif %}">
         <a href="{% url "contentions_stats" %}?what=crowded_contentions&days=7">{% trans "Statistics" %}</a></li>
 </ul>

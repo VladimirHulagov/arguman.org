@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404
 
+import django_filters.rest_framework
+
 from rest_framework import viewsets
 from rest_framework import permissions
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import filters, status
 
@@ -24,13 +26,13 @@ class ContentionViewset(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     serializer_class = ContentionSerializer
     paginate_by = 20
-    filter_backends = (filters.SearchFilter, filters.DjangoFilterBackend,
+    filter_backends = (filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend,
                        filters.OrderingFilter)
     search_fields = ('title', 'slug',)
     filter_fields = ('is_featured',)
     ordering_fields = ('date_creation',)
 
-    @detail_route()
+    @action(detail=True)
     def premises(self, request, pk=None):
         contention = self.get_object()
         serializer = PremisesSerializer(
@@ -70,7 +72,7 @@ class ContentionViewset(viewsets.ModelViewSet):
         contention.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @detail_route()
+    @action(detail=True)
     def create_premise(self, request, pk=None):
         contention = self.get_object()
         serializer = PremisesSerializer(
@@ -95,7 +97,7 @@ class PremiseViewset(viewsets.ModelViewSet):
         return queryset.filter(argument__id=argument_id,
                                argument__is_published=True)
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def report(self, request, pk=None, premise_id=None):
         premise = self.get_object()
         if premise.reports.filter(reporter=request.user).exists():
@@ -139,7 +141,7 @@ class PremiseViewset(viewsets.ModelViewSet):
 
 class PremiseSupportViewset(PremiseViewset):
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def support(self, request, pk=None, premise_id=None):
         premise = self.get_object()
         if premise.supporters.filter(id=request.user.id).exists():
@@ -150,14 +152,14 @@ class PremiseSupportViewset(PremiseViewset):
                                  user=self.request.user)
         return Response(status=status.HTTP_201_CREATED)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def supporters(self, request, pk=None, premise_id=None):
         premise = self.get_object()
         page = self.paginate_queryset(premise.supporters.all())
         serializer = self.get_pagination_serializer(page)
         return Response(serializer.data)
 
-    @detail_route(methods=['delete'])
+    @action(detail=True, methods=['delete'])
     def unsupport(self, request, pk=None, premise_id=None):
         premise = self.get_object()
         if not premise.supporters.filter(id=request.user.id).exists():

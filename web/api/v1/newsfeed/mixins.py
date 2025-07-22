@@ -2,7 +2,7 @@ from rest_framework.templatetags.rest_framework import replace_query_param
 from premises.utils import int_or_default
 
 
-class MongoDBPaginationMixin(object):
+class MongoDBPaginationMixin:
     """
     Query parameters:
     :param page (integer)

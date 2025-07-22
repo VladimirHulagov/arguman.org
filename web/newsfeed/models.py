@@ -24,7 +24,7 @@ RELATED_MODELS = {
 }
 
 
-class EntryManager(object):
+class EntryManager:
     """
     A manager that allows you to manage newsfeed items.
     """
@@ -62,30 +62,30 @@ class EntryManager(object):
         if related_object is not None:
             entry_bundle["related_object"] = related_object
 
-        self.collection.insert(entry_bundle)
+        self.collection.insert_one(entry_bundle)
 
     def add_to_recipients(self, following, follower):
         """
         Adds the id of follower to the recipients of
         followed profile's entries.
         """
-        self.collection.update(
+        self.collection.update_many(
             {"sender.username": following.username},
-            {"$push": {"recipients": follower.id}}, multi=True)
+            {"$push": {"recipients": follower.id}})
 
     def remove_from_recipients(self, following, follower):
         """
         Removes follower id from the recipients of followed profile's entries.
         """
-        self.collection.update(
+        self.collection.update_many(
             {"sender.username": following.username},
-            {"$pull": {"recipients": follower.id}}, multi=True)
+            {"$pull": {"recipients": follower.id}})
 
     def delete(self, object_type, object_id):
         """
         Removes news entry from provided object type and object id.
         """
-        self.collection.remove({
+        self.collection.delete_one({
             "news_type": object_type,
             "object_id": object_id})
 

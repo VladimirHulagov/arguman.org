@@ -1,5 +1,3 @@
-# -*- coding:utf-8 -*-
-
 import json
 from datetime import timedelta
 from django.conf import settings
@@ -7,7 +5,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from markdown2 import markdown
 
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils import timezone
 from django.db.models import Max, Sum
 from django.utils.timezone import now
@@ -81,7 +79,7 @@ class ContentionDetailView(DetailView):
         elif serialized['premises']:
             description = serialized['premises'][0]['text']
 
-        return super(ContentionDetailView, self).get_context_data(
+        return super().get_context_data(
             premises=self.get_premises(),
             parent_premise=parent,
             description=description,
@@ -94,7 +92,8 @@ class ContentionDetailView(DetailView):
         self.object = self.get_object()
         host = request.META['HTTP_HOST']
 
-        if not host.startswith(settings.AVAILABLE_LANGUAGES):
+        languages = tuple("{}.".format(language_code) for language_code, language in settings.LANGUAGES)
+        if not host.startswith(languages):
             return redirect(self.object.get_full_url(), permanent=True)
 
         if not normalize_language_code(get_language()) == self.object.language:
@@ -117,7 +116,7 @@ class ContentionDetailView(DetailView):
                 'level': int(level)
             })
 
-        return super(ContentionDetailView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
 
 class ContentionJsonView(DetailView):
@@ -162,7 +161,7 @@ class ContentionJsonView(DetailView):
         return children
 
     def user_can_report(self, premise, user):
-        if user.is_authenticated() and user != premise.user:
+        if user.is_authenticated and user != premise.user:
             return not premise.reported_by(user)
 
         return False
@@ -181,13 +180,13 @@ class HomeView(TemplateView, PaginationMixin):
 
     def get_context_data(self, **kwargs):
         contentions = self.get_contentions()
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             notifications_qs = self.get_unread_notifications()
             notifications = list(notifications_qs)
             self.mark_as_read(notifications_qs)
         else:
             notifications = None
-        return super(HomeView, self).get_context_data(
+        return super().get_context_data(
             channels=self.get_channels(),
             next_page_url=self.get_next_page_url(),
             tab_class=self.tab_class,
@@ -241,7 +240,7 @@ class NotificationsView(LoginRequiredMixin, HomeView):
         notifications_qs = self.request.user.notifications.all()[:40]
         notifications = list(notifications_qs)
         self.mark_as_read(notifications_qs)
-        return super(HomeView, self).get_context_data(
+        return super().get_context_data(
             notifications=notifications,
             **kwargs)
 
@@ -259,7 +258,7 @@ class FallaciesView(HomeView, PaginationMixin):
                              contention__language=language)
                      .order_by('-id')
                      [self.get_offset():self.get_limit()])
-        return super(FallaciesView, self).get_context_data(
+        return super().get_context_data(
             fallacies=fallacies,
             **kwargs)
 
@@ -281,7 +280,7 @@ class SearchView(HomeView):
         self.type = request.GET.get('type', 'contentions')
         if not self.method_mapping.get(self.type):
             raise Http404()
-        return super(SearchView, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_keywords(self):
         return self.request.GET.get('keywords') or ''
@@ -301,7 +300,7 @@ class SearchView(HomeView):
                  'object': item} for item in method()]
 
     def get_context_data(self, **kwargs):
-        return super(SearchView, self).get_context_data(
+        return super().get_context_data(
             results=self.get_search_bundle(),
             **kwargs)
 
@@ -356,12 +355,12 @@ class SearchView(HomeView):
         Returns a JSON response, transforming 'context' to make the payload.
         """
         if not self.is_json():
-            return super(SearchView, self).render_to_response(
+            return super().render_to_response(
                 context, **response_kwargs)
 
         results = [{
                        "id": result['object'].id,
-                       "label": unicode(result['object'])
+                       "label": result['object']
                    } for result in context['results']]
 
         return HttpResponse(
@@ -431,7 +430,7 @@ class StatsView(HomeView):
     time_ranges = [7, 30]
 
     def get_context_data(self, **kwargs):
-        return super(StatsView, self).get_context_data(
+        return super().get_context_data(
             stats=self.get_stats_bundle(),
             stats_type=self.get_stats_type(),
             days=self.days,
@@ -564,7 +563,7 @@ class AboutView(TemplateView):
 
     def get_context_data(self, **kwargs):
         content = markdown(self.get_text_file())
-        return super(AboutView, self).get_context_data(
+        return super().get_context_data(
             content=content, **kwargs)
 
 
@@ -573,7 +572,7 @@ class TosView(TemplateView):
 
     def get_context_data(self, **kwargs):
         content = markdown(render_to_string("tos.md"))
-        return super(TosView, self).get_context_data(
+        return super().get_context_data(
             content=content, **kwargs)
 
 
@@ -599,7 +598,7 @@ class ArgumentCreationView(LoginRequiredMixin, CreateView):
         form.instance.ip_address = get_ip_address(self.request)
         form.instance.language = normalize_language_code(get_language())
         form.instance.is_published = True
-        response = super(ArgumentCreationView, self).form_valid(form)
+        response = super().form_valid(form)
         form.instance.update_sibling_counts()
         form.instance.save_nouns()
         form.instance.save()
@@ -617,7 +616,7 @@ class ArgumentUpdateView(LoginRequiredMixin, UpdateView):
         return contentions.filter(user=self.request.user)
 
     def form_valid(self, form):
-        response = super(ArgumentUpdateView, self).form_valid(form)
+        response = super().form_valid(form)
         form.instance.update_sibling_counts()
         form.instance.nouns.clear()
         form.instance.save_nouns()
@@ -637,8 +636,8 @@ class RandomArgumentView(RedirectView):
             language=normalize_language_code(get_language())
         ).order_by(
             '?'
-        )[0]
-        return argument.get_absolute_url()
+        ).first()
+        return argument and argument.get_absolute_url()
 
 
 class ArgumentPublishView(LoginRequiredMixin, DetailView):
@@ -681,8 +680,6 @@ class ArgumentDeleteView(LoginRequiredMixin, DetailView):
             messages.info(request, u"Argument cannot be deleted.")
             return redirect(contention)
 
-    delete = post
-
 
 class PremiseEditView(LoginRequiredMixin, UpdateView):
     template_name = "premises/edit_premise.html"
@@ -708,12 +705,12 @@ class PremiseEditView(LoginRequiredMixin, UpdateView):
         return premises.filter(user=self.request.user)
 
     def form_valid(self, form):
-        response = super(PremiseEditView, self).form_valid(form)
+        response = super().form_valid(form)
         form.instance.argument.update_sibling_counts()
         return response
 
     def get_context_data(self, **kwargs):
-        return super(PremiseEditView, self).get_context_data(**kwargs)
+        return super().get_context_data(**kwargs)
 
 
 class PremiseCreationView(NextURLMixin, LoginRequiredMixin, CreateView):
@@ -734,7 +731,7 @@ class PremiseCreationView(NextURLMixin, LoginRequiredMixin, CreateView):
         return form_class
 
     def get_context_data(self, **kwargs):
-        return super(PremiseCreationView, self).get_context_data(
+        return super().get_context_data(
             contention=self.get_contention(),
             view=self.get_view_name(),
             parent=self.get_parent(),
@@ -855,7 +852,7 @@ class ReportView(NextURLMixin, LoginRequiredMixin, CreateView):
         return form
 
     def get_context_data(self, **kwargs):
-        return super(ReportView, self).get_context_data(
+        return super().get_context_data(
             premise=self.get_premise(),
             view=self.get_view_name(),
             **kwargs)

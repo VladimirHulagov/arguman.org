@@ -4,7 +4,7 @@
 
 <div class="premise">
     <div class="thread-user">
-        
+
         <a class="avatar" href="{% url "auth_profile" premise.user.username %}">
             {% gravatar profile.user 80 %}
         </a>
@@ -45,8 +45,10 @@
         {% endif %}
         {% if premise.supporters.exists %}
             <div class="thread-supporters">
-                {% blocktrans trimmed with count=premise.supporters.count %}
+                {% blocktrans trimmed count premise.supporter_count as count %}
                     {{ count }} supporter.
+                {% plural %}
+                    {{ count }} supporters.
                 {% endblocktrans %}
                 <div class="supporter-list">
                     {% for supporter in premise.recent_supporters %}
@@ -71,8 +73,10 @@
 
      {% if premise.reports.exists %}
     <div class="thread-fallacies">
-        {% blocktrans trimmed with count=premise.reports.count %}
+        {% blocktrans trimmed count premise.reports.count as count %}
             {{ count }} fallacy reported.
+            {% plural %}
+            {{ count }} fallacies reported.
         {% endblocktrans %}
         {% if premise.fallacies %}
             {% for fallacy in premise.fallacies %}
@@ -85,26 +89,26 @@
     {% if user.is_authenticated %}
     <div class="thread-actions">
         {% if user == premise.user %}
-        <a class="thread-action" 
+        <a class="thread-action"
            href="{% url "edit_premise" contention.slug premise.pk %}?view=list">
             {% trans "edit" %}
         </a>
-        
+
         <form class="thread-action" action="{% url "delete_premise" contention.slug premise.pk %}?view=list" method="post">
             {% csrf_token %}
-            <input 
-                type="submit" 
+            <input
+                type="submit"
                 value="{% trans "remove" %}"
                 onclick="return confirm('{% trans "Are you sure to remove this premise?" %}');"
                 class="delete_premise"/>
         </form>
         {% endif %}
-        
-        <a class="thread-action" 
+
+        <a class="thread-action"
             href="{% url "insert_premise" contention.slug premise.pk %}?view=list">
             {% trans "add premise" %}
         </a>
-        
+
         {% if premise.user != user %}
             {% if user in premise.supporters.all %}
                 <form class="thread-action" action="{% url "unsupport_premise" contention.slug premise.pk %}?view=list"
