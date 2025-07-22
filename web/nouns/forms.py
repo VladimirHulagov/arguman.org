@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 from django import forms
 from django.utils.translation import get_language
 
 from i18n.utils import normalize_language_code
-from premises.mixins import FormRenderer
 from nouns.models import Relation, Noun
 
 
-class RelationCreationForm(FormRenderer, forms.ModelForm):
+class RelationCreationForm(forms.ModelForm):
     target_noun = forms.CharField()
     relation_type = forms.ChoiceField(
         choices=Relation.TYPES, widget=forms.RadioSelect)

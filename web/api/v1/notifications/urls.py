@@ -1,10 +1,9 @@
-from django.conf.urls import patterns, url
+from django.urls import re_path
 from .views import notification_list, notification_detail
 
-urlpatterns = patterns(
-    '',
-    url(r'^$', notification_list,
+urlpatterns = [
+    re_path(r'^$', notification_list,
         name='api-notification-list'),
-    url(r'^(?P<pk>[0-9]+)/$', notification_detail,
+    re_path(r'^(?P<pk>[0-9]+)/$', notification_detail,
         name='api-notification-detail'),
-)
+]

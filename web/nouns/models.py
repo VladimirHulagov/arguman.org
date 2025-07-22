@@ -1,16 +1,18 @@
 from uuid import uuid4
-from unidecode import unidecode
-
+import re
 from django.db import models
-from django.utils.encoding import smart_unicode
+from django.urls import reverse
 from django.conf import settings
 from django.template.defaultfilters import slugify
-from django.utils.functional import curry
-from django.utils.translation import ugettext_lazy as _, get_language
-from anora.templatetags.anora import CONSONANT_SOUND, VOWEL_SOUND
+from functools import partialmethod
+from django.utils.translation import gettext_lazy as _, get_language
 from i18n.utils import normalize_language_code
 
 from nouns.utils import get_synsets, get_lemmas, from_lemma
+
+
+CONSONANT_SOUND = re.compile(r'''one(![ir])''', re.IGNORECASE|re.VERBOSE)
+VOWEL_SOUND = re.compile(r'''[aeio]|u([aeiou]|[^n][^aeiou]|ni[^dmnl]|nil[^l])|h(ier|onest|onou?r|ors\b|our(!i))|[fhlmnrsx]\b''', re.IGNORECASE|re.VERBOSE)
 
 
 class Noun(models.Model):
@@ -18,23 +20,24 @@ class Noun(models.Model):
     slug = models.SlugField(max_length=255, blank=True)
     language = models.CharField(max_length=25)
     is_active = models.BooleanField(default=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = (("text", "language"),)
 
-    def __unicode__(self):
-        return smart_unicode(self.text).title()
+    def __str__(self):
+        return self.text.title()
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            slug = slugify(unidecode(self.text))
+            slug = slugify(self.text)
             duplications = Noun.objects.filter(slug=slug,
                                                language=self.language)
             if duplications.exists():
                 self.slug = "%s-%s" % (slug, uuid4().hex)
             else:
                 self.slug = slug
-        return super(Noun, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     @classmethod
     def from_synset(cls, synset):
@@ -112,9 +115,8 @@ class Noun(models.Model):
             nouns__in=nouns
         ).order_by('?')
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'nouns_detail', [self.slug]
+        return reverse('nouns_detail', args=[self.slug])
 
     def serialize(self):
         return {
@@ -135,21 +137,21 @@ class Noun(models.Model):
         )
         return relation
 
-    add_hypernym = curry(add_relation, relation_type="hypernym")
-    add_holonym = curry(add_relation, relation_type="holonym")
-    add_antonym = curry(add_relation, relation_type="antonym")
+    add_hypernym = partialmethod(add_relation, relation_type="hypernym")
+    add_holonym = partialmethod(add_relation, relation_type="holonym")
+    add_antonym = partialmethod(add_relation, relation_type="antonym")
 
 
 class Keyword(models.Model):
     """
     Keywords for matching contentions.
     """
-    noun = models.ForeignKey(Noun, related_name="keywords")
+    noun = models.ForeignKey(Noun, related_name="keywords", on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
 
-    def __unicode__(self):
-        return smart_unicode(self.text)
+    def __str__(self):
+        return self.text
 
 
 class Relation(models.Model):
@@ -174,15 +176,15 @@ class Relation(models.Model):
         (ANTONYM, _('opposite with')),
     )
 
-    source = models.ForeignKey(Noun, related_name="out_relations")
-    target = models.ForeignKey(Noun, related_name="in_relations")
+    source = models.ForeignKey(Noun, related_name="out_relations", on_delete=models.CASCADE)
+    target = models.ForeignKey(Noun, related_name="in_relations", on_delete=models.CASCADE)
     relation_type = models.CharField(max_length=25, choices=TYPES)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, blank=True, null=True, on_delete=models.SET_NULL)
     is_active = models.BooleanField(default=True)
     date_created = models.DateTimeField(auto_now_add=True)
 
-    def __unicode__(self):
-        return smart_unicode(self.relation_type)
+    def __str__(self):
+        return self.relation_type
 
     def reverse_type(self):
         return {
@@ -201,7 +203,7 @@ class Relation(models.Model):
     def relation_type_label(self):
         if (self.relation_type == Relation.HYPERNYM
                 and self.target.language == 'en'):
-            text = unicode(self.target)
+            text = self.target
             return ('is an' if not CONSONANT_SOUND.match(text)
                                and VOWEL_SOUND.match(text)
                     else 'is a')
@@ -211,23 +213,22 @@ class Relation(models.Model):
 class Channel(models.Model):
     title = models.CharField(max_length=255)
     slug = models.CharField(max_length=255)
-    nouns = models.ManyToManyField('Noun', null=True, blank=True)
+    nouns = models.ManyToManyField('Noun', blank=True)
     order = models.IntegerField()
     language = models.CharField(max_length=255, blank=True, null=True)
     is_featured = models.BooleanField(max_length=255, default=False)
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            slug = slugify(unidecode(self.text))
+            slug = slugify(self.text)
             self.slug = slug
-        return super(Channel, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
-    def __unicode__(self):
-        return smart_unicode(self.title)
+    def __str__(self):
+        return self.title
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'channel_detail', [self.slug]
+        return reverse('channel_detail', args=[self.slug])
 
     def serialize(self):
         return {

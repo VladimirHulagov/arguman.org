@@ -12,4 +12,4 @@ class Command(BaseCommand):
 
         for contention in contentions:
             contention.save_nouns()
-            print contention.title, contention.nouns.all()
+            print(contention.title, contention.nouns.all())

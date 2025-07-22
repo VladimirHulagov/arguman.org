@@ -1,20 +1,18 @@
-# -*- coding: utf-8 -*-
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from premises.constants import MAX_PREMISE_CONTENT_LENGTH
-from premises.mixins import FormRenderer
 from premises.models import Contention, Premise, Report
 
 
-class ArgumentCreationForm(FormRenderer, forms.ModelForm):
+class ArgumentCreationForm(forms.ModelForm):
     class Meta:
         model = Contention
         fields = ['title', 'owner', 'sources']
 
 
-class PremiseCreationForm(FormRenderer, forms.ModelForm):
+class PremiseCreationForm(forms.ModelForm):
 
     class Meta:
         model = Premise
@@ -45,7 +43,7 @@ class PremiseEditForm(PremiseCreationForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(PremiseEditForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         queryset = (
             self.instance.argument.premises
                 .exclude(pk=self.instance.pk)  # avoid self-loop
@@ -73,4 +71,4 @@ class ReportForm(forms.ModelForm):
                 )
             )
 
-        super(ReportForm, self).clean()
+        super().clean()

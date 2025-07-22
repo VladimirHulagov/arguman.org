@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework import permissions
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -19,13 +19,13 @@ class UserProfileViewset(viewsets.ModelViewSet):
     lookup_field = 'username__iexact'
     lookup_url_kwarg = 'username'
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def authenticated_user(self, request):
         user = request.user
         serializer = self.serializer_class(user)
         return Response(serializer.data)
 
-    @detail_route(methods=['put'])
+    @action(detail=True, methods=['put'])
     def update_profile(self, request):
         form = ProfileUpdateForm(request.DATA, instance=request.user)
         if form.is_valid():
@@ -41,7 +41,7 @@ class UserFollowViewset(viewsets.ModelViewSet):
     lookup_field = 'username__iexact'
     lookup_url_kwarg = 'username'
 
-    @detail_route(methods=['post'])
+    @action(detail=True, methods=['post'])
     def follow(self, request, username=None):
         user = self.get_object()
         if user.id == request.user.id:
@@ -57,7 +57,7 @@ class UserFollowViewset(viewsets.ModelViewSet):
         follow_done.send(sender=self, follower=request.user, following=user)
         return Response(status=status.HTTP_201_CREATED)
 
-    @detail_route(methods=['delete'])
+    @action(detail=True, methods=['delete'])
     def unfollow(self, request, username=None):
         user = self.get_object()
         if not request.user.following.filter(id=user.id).exists():
@@ -69,14 +69,14 @@ class UserFollowViewset(viewsets.ModelViewSet):
         unfollow_done.send(sender=self, follower=request.user, following=user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def followings(self, request, username=None):
         user = self.get_object()
         page = self.paginate_queryset(user.following.all())
         serializer = self.get_pagination_serializer(page)
         return Response(serializer.data)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def followers(self, request, username=None):
         user = self.get_object()
         page = self.paginate_queryset(user.followers.all())
@@ -90,18 +90,18 @@ class UserArgumentsView(viewsets.ModelViewSet):
     lookup_field = 'username__iexact'
     lookup_url_kwarg = 'username'
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def user_arguments(self, request, username=None):
         user = self.get_object()
         arguments = user.contention_set.filter()
-        if not(self.request.user.is_authenticated() and
+        if not(self.request.user.is_authenticated and
                 user == self.request.user):
             arguments = arguments.filter(is_published=True)
         page = self.paginate_queryset(arguments)
         serializer = self.get_pagination_serializer(page)
         return Response(serializer.data)
 
-    @detail_route(methods=['get'])
+    @action(detail=True, methods=['get'])
     def user_contributed(self, request, username=None):
         user = self.get_object()
         page = self.paginate_queryset(Contention.objects.filter(

@@ -1,18 +1,15 @@
 """
 Django settings for arguman project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from datetime import timedelta
+
+from django.utils.translation import gettext_lazy as _
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-from datetime import timedelta
+BASE_DOMAIN = os.getenv("BASE_DOMAIN", "localhost:8000")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -22,14 +19,11 @@ SECRET_KEY = 'qlp_henm3k-$7u@9b(@coqgpd1-2xmtox%a8_#*r9=0wh5d0oo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,8 +34,9 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.sitemaps',
 
+    'markitup',
     'typogrify',
-    'social_auth',
+    'social_django',
     'django_gravatar',
     'rest_framework',
     'rest_framework.authtoken',
@@ -53,7 +48,7 @@ INSTALLED_APPS = (
     'api',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -61,8 +56,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'i18n.middleware.SubdomainLanguageMiddleware',
-    'i18n.middleware.MultipleProxyMiddleware'
+    'i18n.middleware.MultipleProxyMiddleware',
+    'main.middleware.AjaxMiddleware'
 )
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale/'),
@@ -71,7 +69,6 @@ LOCALE_PATHS = (
 ROOT_URLCONF = 'main.urls'
 
 WSGI_APPLICATION = 'main.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
@@ -86,6 +83,25 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
+LANGUAGES = [
+    ("tr", _("Turkish")),
+    ("en", _("English")),
+    ("ch", _("Chinese")),
+    ("es", _("Spanish")),
+    ("fr", _("French")),
+    ("pl", _("Polish")),
+]
+
+LANGUAGE_CODE = "en"
+
+LANGUAGE_CODE_MAPPING = {
+    'ch': 'zh-Hans'
+}
+
+LANGUAGE_CODE_MAPPING_REVERSED = {
+    v.lower(): k for k, v in LANGUAGE_CODE_MAPPING.items()
+}
+
 PREVENT_LANGUAGE_REDIRECTION = False
 
 REDIRECTED_PATHS = (
@@ -98,26 +114,6 @@ REDIRECTED_PATHS = (
     '/new-argument'
 )
 
-DEFAULT_LANGUAGE = 'en'
-
-BASE_DOMAIN = 'arguman.org'
-
-AVAILABLE_LANGUAGES = (
-    'tr',
-    'en',
-    'ch',
-    'es',
-    'fr',
-    'pl'
-)
-
-LANGUAGE_CODE_MAPPING = {
-    'ch': 'zh-Hans'
-}
-
-LANGUAGE_CODE_MAPPING_REVERSED = {
-    v.lower(): k for k, v in LANGUAGE_CODE_MAPPING.iteritems()
-}
 
 TIME_ZONE = 'UTC'
 
@@ -132,20 +128,34 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = '/tmp'
 STATICFILES_DIRS = (
-    os.path.join(os.path.dirname(__file__), "../static"),
+    os.path.join(BASE_DIR, "static"),
 )
 
 
-TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), "../templates"),
-)
-
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, "templates"),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'main.context_processors.settings',
+            ],
+        },
+    },
+]
 
 # Social Auth Settings
 AUTHENTICATION_BACKENDS = (
-    'social_auth.backends.twitter.TwitterBackend',
+    'social_core.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -223,14 +233,15 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': '%d-%m-%Y %H:%m'
 }
 
-MONGODB_HOST = "localhost"
+MONGODB_HOST = os.getenv("MONGODB_HOST", "mongodb")
 MONGODB_DATABASE = "arguman"
 
 SITE_URL = "arguman.org"
 
 # Markitup Settings
 MARKITUP_SET = 'markitup/sets/markdown'
-MARKITUP_FILTER = ('markdown.markdown', {'safe_mode': False})
+MARKITUP_SKIN = 'markitup/skins/markitup/'
+MARKITUP_FILTER = ('markdown.markdown', {})
 
 BLOG_FEED_TITLE = "Arguman.org Blog'u"
 BLOG_FEED_DESCRIPTION = "Arguman analizi platformu"
@@ -244,7 +255,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'null': {
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
         },
     },
     'loggers': {
@@ -256,6 +267,6 @@ LOGGING = {
 }
 
 try:
-    from settings_local import *
+    from .settings_local import *
 except ImportError:
-    print "settings_local.py not found!"
+    print("settings_local.py not found!")
