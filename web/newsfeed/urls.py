@@ -1,12 +1,8 @@
-from django.conf.urls import patterns, url
+from django.urls import path
+from .views import NewsfeedView, PublicNewsfeedView
 
-from newsfeed.views import NewsfeedView, PublicNewsfeedView
 
-
-urlpatterns = patterns(
-    '',
-    url(r'^newsfeed$', NewsfeedView.as_view(),
-        name='newsfeed'),
-    url(r'^newsfeed/public$', PublicNewsfeedView.as_view(),
-        name='public_newsfeed'),
-)
+urlpatterns = [
+    path('newsfeed', NewsfeedView.as_view(), name='newsfeed'),
+    path('newsfeed/public', PublicNewsfeedView.as_view(), name='public_newsfeed'),
+]

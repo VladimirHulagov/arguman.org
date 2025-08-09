@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+import django_filters.rest_framework
+
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import filters, status
@@ -12,7 +13,7 @@ class NotificationViewset(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     paginate_by = 20
     serializer_class = NotificationSerializer
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter,)
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend, filters.OrderingFilter,)
     filter_fields = ('is_read',)
     ordering_fields = ('date_created',)
 

@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import re
 
 from django import forms
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.forms import (UserCreationForm, 
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.forms import (UserCreationForm,
     AuthenticationForm as BaseAuthenticationForm)
 
 from profiles.models import Profile
@@ -13,14 +11,14 @@ from profiles.models import Profile
 class AuthenticationForm(BaseAuthenticationForm):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('label_suffix', '')
-        super(AuthenticationForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 
 class RegistrationForm(UserCreationForm):
     username = forms.RegexField(
         label=_("Username"),
-        max_length=30, regex=re.compile(r'^[\w\s-]+$', re.LOCALE),
+        max_length=30, regex=re.compile(r'^[\w\s-]+$'),
         help_text=_('Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only.'),
         error_messages={
             'invalid': _("Invalid characters")
@@ -33,7 +31,7 @@ class RegistrationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('label_suffix', '')
-        super(RegistrationForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean_username(self):
         # Since User.username is unique, this check is redundant,
@@ -80,7 +78,7 @@ class ProfileUpdateForm(forms.ModelForm):
     def save(self, commit=True):
         if self.cleaned_data.get("new_password1"):
             self.instance.set_password(self.cleaned_data['new_password1'])
-        return super(ProfileUpdateForm, self).save(commit)
+        return super().save(commit)
 
     def clean_username(self):
         username = self.cleaned_data["username"]

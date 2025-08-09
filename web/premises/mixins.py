@@ -6,17 +6,6 @@ from django.db import models
 from premises.utils import int_or_zero
 
 
-class FormRenderer(object):
-    def as_p(self):
-        "Returns this form rendered as HTML <p>s."
-        return self._html_output(
-            normal_row='<p%(html_class_attr)s>%(label)s %(field)s%(help_text)s</p>',
-            error_row='%s',
-            row_ender='</p>',
-            help_text_html=' <div class="helptext">%s</div>',
-            errors_on_separate_row=True)
-
-
 class DeletePreventionMixin(models.Model):
 
     is_deleted = models.BooleanField(default=False)
@@ -42,7 +31,7 @@ class DeletePreventionMixin(models.Model):
         )
 
 
-class PaginationMixin(object):
+class PaginationMixin:
 
     def get_offset(self):
         return int_or_zero(self.request.GET.get("offset"))
@@ -61,7 +50,7 @@ class PaginationMixin(object):
         }
 
 
-class NextURLMixin(object):
+class NextURLMixin:
     # todo: find a proper way to handle this and remove this mixin
     def get_view_name(self):
         view = self.request.GET.get("view")

@@ -1,12 +1,12 @@
 # Contributing to Arguman
 
 Looking to contribute something to Arguman? We're happy to hear that!
- 
+
 This document describes how you can help and guides you through the process.
- 
-When contributing to this repository, please first [create a relevant issue](https://github.com/arguman/arguman.org/issues/new). 
+
+When contributing to this repository, please first [create a relevant issue](https://github.com/arguman/arguman.org/issues/new).
 It will signal others than you want to tackle given challenge and it will be a place to discuss changes. If you then want to contribute to the project with code or translations then pull requests are the standard mechanism.
- 
+
 ## Pull request process
 
 1. Create an issue for the things you want to do
@@ -19,12 +19,12 @@ It will signal others than you want to tackle given challenge and it will be a p
     Contributing.md serves as a go-to resources for everyone willing to
     contribute to the project. It should be clear and document most common
     cases, such as:
-    
+
     - explaining pull request process
     - guidelines for creating issues
     - documenting translation process
-    
-    [The first line in a commit messages is a real life imperative statement 
+
+    [The first line in a commit messages is a real life imperative statement
     with an issue number. The body describes the behavior without the patch,
     why this is a problem, and how the patch fixes the problem when applied.]
     ```
@@ -36,13 +36,13 @@ It will signal others than you want to tackle given challenge and it will be a p
 ## Translations
 
 Steps to create translation for a new language, assuming [language's code](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) is `xx`:
- 
+
 1. Run `python manage.py makemessages -l xx`
 2. Translate generated locale file `web/locale/xx/LC_MESSAGES/django.po`
-2. Add your language code to `AVAILABLE_LANGUAGES` setting in `web/main/settings.py`
+2. Add your language code to `LANGUAGES` setting in `web/main/settings.py`
 3. Copy `web/templates/about-en.md` file to `about-xx.md` and translate it
 4. Compile locale file by running `python manage.py compilemessages -l xx`
-5. Send the pull request with all the changes  
+5. Send the pull request with all the changes
 
 ### Writing Translatable Code
 
@@ -64,8 +64,8 @@ Check [Django docs](https://docs.djangoproject.com/en/1.7/topics/i18n/translatio
 
 ### Language Corpus
 
-To properly create n-grams it is necessary to have corpus in given language. 
-While sending new language please suggest corpus that could be used for that. 
+To properly create n-grams it is necessary to have corpus in given language.
+While sending new language please suggest corpus that could be used for that.
 You can start your search with http://www.nltk.org/data.html.
 
 ## Code of Conduct

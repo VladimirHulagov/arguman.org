@@ -4,7 +4,7 @@
 {% block content %}
     <section class="container">
         <form id="auth-form" action="{% url "auth_login" %}?next={{ next }}" method="post">
-            <h3>{% trans "Login" %}(<a href="{% url "socialauth_begin" "twitter" %}">{% trans "or login with twitter" %}</a>)</h3>
+            <h3>{% trans "Login" %}(<a href="{% url "social:begin" "twitter" %}">{% trans "or login with twitter" %}</a>)</h3>
             {% csrf_token %}
             {{ form.as_p }}
             <div class="form-footer">
